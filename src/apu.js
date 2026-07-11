@@ -130,6 +130,7 @@ class Player {
     this.samplesPerFrame = sampleRate / FRAME_RATE;
     this.song = null;
     this.playing = false;
+    this.mute = {};
     this.onStep = null;
     this.step = -1; this.frameInStep = 0; this.sampleAcc = 0;
     this.notes = { p1: null, p2: null, tri: null, noise: null }; // {framesLeft, frame}
@@ -143,7 +144,20 @@ class Player {
   rewind() { this.step = -1; this.frameInStep = 0; this.sampleAcc = 0; this.notes = { p1: null, p2: null, tri: null, noise: null }; }
   play() { this.rewind(); this.playing = true; }
   stop() { this.playing = false; this.rewind(); this.apu.silence(); }
+  // mute is a live-listening tool: silences a channel now and blocks new notes.
+  // It never touches song data, so exports are unaffected.
+  setMute(mute) {
+    this.mute = mute || {};
+    for (const ch of ["p1", "p2", "noise"]) {
+      if (this.mute[ch]) {
+        this.notes[ch] = null;
+        (ch === "noise" ? this.apu.noise : this.apu[ch]).vol = 0;
+      }
+    }
+    if (this.mute.tri) { this.notes.tri = null; this.apu.tri.on = false; }
+  }
   startNote(ch, cell, fps) {
+    if (this.mute[ch]) return;
     const note = { framesLeft: cell.len * fps, frame: 0 };
     if (ch === "p1" || ch === "p2") this.apu[ch].setNote(pulsePeriod(midiFreq(cell.n)));
     else if (ch === "tri") this.apu.tri.setNote(triPeriod(midiFreq(cell.n)));

@@ -81,6 +81,8 @@
 
   .tabs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 8px; }
   .tabs .btn { padding: 9px 2px; font-size: 12px; }
+  .mutes .btn { padding: 4px 2px; font-size: 11px; color: var(--muted); border-color: var(--soft); }
+  .mutes .btn.on { color: #000; border-color: var(--ink); }
 
   .gridwrap { border: 1px solid var(--line); overflow-x: auto; }
   .grid { display: flex; flex-direction: column; gap: 2px; padding: 4px; }
@@ -163,6 +165,7 @@
         <span class="pos" id="pos"></span>
       </div>
       <nav class="tabs" id="tabs"></nav>
+      <nav class="tabs mutes" id="mutes"></nav>
       <section class="gridwrap"><div class="grid" id="grid"></div></section>
       <div class="row under">
         <button class="btn sm" id="undoBtn">↶ undo</button>
@@ -216,6 +219,8 @@
        it has no volume control; the real console doesn't either.</p>
     <p><b style="color:#bcbcbc">noise</b> — static, for drums. row 1 is short and
        sharp; higher rows are deeper.</p>
+    <p><code>mute</code> under a sound silences it while you listen, so you can
+       hear the others alone. muted sounds still export.</p>
 
     <h2>placing notes</h2>
     <p>pick a sound, then tap a square. up and down is pitch, left to right is time.

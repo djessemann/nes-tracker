@@ -13,6 +13,7 @@ class NesProcessor extends AudioWorkletProcessor {
       if (m.cmd === "song") this.player.setSong(m.song);
       else if (m.cmd === "play") { this.player.setSong(m.song); this.player.play(); }
       else if (m.cmd === "stop") this.player.stop();
+      else if (m.cmd === "mute") this.player.setMute(m.mute);
       else if (m.cmd === "preview") this.player.preview(m.ch, m.cell);
     };
     this.player.onStep = (s) => this.port.postMessage({ step: s });

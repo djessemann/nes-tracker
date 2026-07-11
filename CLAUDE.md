@@ -75,6 +75,9 @@ Companion app to nesprite (https://djessemann.github.io/nesprite/).
 - Test on a narrow viewport; the grid must stay usable at 375px wide.
 - localStorage key "nestracker-v2" holds { doc, oct }. Old v1 song files
   (with a `patt` key) still load through migrateV1() — don't break it.
+- Channel mutes are a live-listening tool on Player (setMute) only.
+  They are session-only state and must never affect compileSong or the
+  export paths.
 
 ## Roadmap (owner's priorities)
 

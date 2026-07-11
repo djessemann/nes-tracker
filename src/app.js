@@ -84,6 +84,8 @@ const state = {
   playStep: -1,
   page: "tracker",
   shapeOpen: false,
+  mute: { p1: false, p2: false, tri: false, noise: false }, // listening tool; not saved
+
   undo: [],
 };
 try {
@@ -112,7 +114,11 @@ document.addEventListener("visibilitychange", () => { if (document.visibilitySta
 
 // ---------- audio sync ----------
 const compiled = () => compileSong(state.doc, { mode: state.mode, loopPat: safePos() });
-function syncSong() { if (audioReady()) post({ cmd: "song", song: compiled() }); }
+function syncSong() {
+  if (!audioReady()) return;
+  post({ cmd: "song", song: compiled() });
+  post({ cmd: "mute", mute: state.mute });
+}
 const onStep = (s) => { if (state.playing) { state.playStep = s; renderPlayhead(); renderPos(); renderFrames(); } };
 
 // every mutation funnels through here: save + live-update + re-render
@@ -159,7 +165,7 @@ const els = {
   modeSeg: $("modeSeg"), newBtn: $("newBtn"), howtoBtn: $("howtoBtn"),
   tracker: $("tracker"), howto: $("howto"),
   playBtn: $("playBtn"), bpm: $("bpm"), pos: $("pos"),
-  tabs: $("tabs"), grid: $("grid"), undoBtn: $("undoBtn"), clearBtn: $("clearBtn"),
+  tabs: $("tabs"), mutes: $("mutes"), grid: $("grid"), undoBtn: $("undoBtn"), clearBtn: $("clearBtn"),
   ctrls: $("ctrls"), shapeRow: $("shapeRow"), envWrap: $("envWrap"), env: $("env"),
   orderSec: $("orderSec"), frames: $("frames"),
   addPart: $("addPart"), repeatPart: $("repeatPart"), copyPart: $("copyPart"), delPart: $("delPart"),
@@ -201,6 +207,7 @@ function stepFromX(rowEl, clientX) {
 async function previewNote(row) {
   await initAudio(onStep);
   post({ cmd: "song", song: compiled() });
+  post({ cmd: "mute", mute: state.mute });
   post({ cmd: "preview", ch: state.tab, cell: { n: row, len: 1 } });
 }
 // during a gesture, never rebuild the grid — that would destroy the row
@@ -327,6 +334,7 @@ async function togglePlay() {
     return;
   }
   await initAudio(onStep);
+  post({ cmd: "mute", mute: state.mute });
   post({ cmd: "play", song: compiled() });
   state.playing = true;
   renderTransport();
@@ -351,6 +359,7 @@ els.bpm.addEventListener("blur", () => { els.bpm.value = String(state.doc.bpm); 
 // ---------- tabs + per-channel controls ----------
 function renderTabs() {
   els.tabs.innerHTML = "";
+  els.mutes.innerHTML = "";
   for (const c of CHANNELS) {
     const b = document.createElement("button");
     b.className = "btn tab";
@@ -360,8 +369,19 @@ function renderTabs() {
     } else {
       b.style.color = c.color; b.style.borderColor = "var(--soft)";
     }
+    if (state.mute[c.id]) b.style.opacity = "0.35";
     b.onclick = () => { state.tab = c.id; state.shapeOpen = false; render(); };
     els.tabs.appendChild(b);
+
+    const m = document.createElement("button");
+    m.className = "btn" + (state.mute[c.id] ? " on" : "");
+    m.textContent = state.mute[c.id] ? "muted" : "mute";
+    m.onclick = async () => {
+      state.mute[c.id] = !state.mute[c.id];
+      if (audioReady()) post({ cmd: "mute", mute: state.mute });
+      renderTabs();
+    };
+    els.mutes.appendChild(m);
   }
 }
 function seg(options, value, onPick) {

@@ -63,6 +63,27 @@ ok(diff > 100, "stems differ per channel");
 const wav2 = renderSong(doc, { mode: "song", sampleRate: 44100 });
 ok(wav.every((v, i) => v === wav2[i]), "render is deterministic");
 
+// ---- mute: silences live, blocks new notes, unmute recovers ----
+{
+  const mp = new Player(44100);
+  mp.setSong(compileSong(doc, { mode: "song" }));
+  mp.play();
+  mp.setMute({ p1: true, p2: true, tri: true, noise: true });
+  mp.process(new Float32Array(44100)); // let the dc blocker settle past the mute click
+  const quiet = new Float32Array(22050);
+  mp.process(quiet);
+  const peakMuted = quiet.reduce((m, v) => Math.max(m, Math.abs(v)), 0);
+  ok(peakMuted < 0.01, `all channels muted -> near silence (peak ${peakMuted.toFixed(4)})`);
+  mp.setMute({});
+  const loud = new Float32Array(44100);
+  mp.process(loud);
+  ok(loud.reduce((m, v) => Math.max(m, Math.abs(v)), 0) > 0.05, "unmute -> sound returns");
+  mp.setMute({ tri: false, noise: false, p1: true, p2: true });
+  const part = new Float32Array(44100);
+  mp.process(part);
+  ok(part.reduce((m, v) => Math.max(m, Math.abs(v)), 0) > 0.02, "partial mute keeps the others audible");
+}
+
 // ---- player streaming == one-shot render (worklet path sanity) ----
 const p = new Player(44100);
 p.setSong(compileSong(doc, { mode: "song" }));
