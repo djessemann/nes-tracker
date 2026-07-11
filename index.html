@@ -83,11 +83,10 @@
   .tabs .btn { padding: 9px 2px; font-size: 12px; }
 
   .gridwrap { border: 1px solid var(--line); overflow-x: auto; }
-  .grid { display: flex; flex-direction: column; gap: 2px; padding: 4px; min-width: 430px; }
-  .gridrow { display: grid; grid-template-columns: 34px repeat(16, 1fr); gap: 2px; height: 26px; touch-action: none; }
+  .grid { display: flex; flex-direction: column; gap: 2px; padding: 4px; }
+  .gridrow { display: grid; grid-template-columns: 28px repeat(16, 1fr); gap: 2px; height: 26px; touch-action: none; }
   .rowlabel { color: var(--soft); font-size: 10px; display: flex; align-items: center; padding-left: 2px;
-              user-select: none; -webkit-user-select: none;
-              position: sticky; left: 4px; background: var(--bg); z-index: 1; }
+              user-select: none; -webkit-user-select: none; overflow: hidden; }
   .cell { background: #0d0d0d; border: 1px solid #262626; pointer-events: none; }
   .cell.beat { background: #1c1c1c; }
   .cell.playing { border-color: var(--ink); }

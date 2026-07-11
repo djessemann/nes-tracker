@@ -192,10 +192,11 @@ const rowsFor = () =>
 let cellEls = {}; // "row:step" -> element, for cheap playhead + span updates
 let drag = null;  // { row, anchor, existing, moved, pushed, rowEl }
 
+const LABEL_W = 28; // keep in sync with .gridrow grid-template-columns
 function stepFromX(rowEl, clientX) {
   const r = rowEl.getBoundingClientRect();
-  const cellW = (r.width - 34) / STEPS;
-  return Math.max(0, Math.min(STEPS - 1, Math.floor((clientX - r.left - 34) / cellW)));
+  const cellW = (r.width - LABEL_W) / STEPS;
+  return Math.max(0, Math.min(STEPS - 1, Math.floor((clientX - r.left - LABEL_W) / cellW)));
 }
 async function previewNote(row) {
   await initAudio(onStep);
