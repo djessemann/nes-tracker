@@ -144,10 +144,6 @@
 <div class="app">
   <header>
     <h1>nestracker</h1>
-    <div class="modeseg" id="modeSeg">
-      <button data-mode="loop" class="on">loop</button>
-      <button data-mode="song">song</button>
-    </div>
     <div class="hdr-actions">
       <button class="howto-link" id="newBtn">new</button>
       <button class="howto-link" id="howtoBtn">how to</button>
@@ -156,6 +152,12 @@
 
   <div class="layout" id="tracker">
     <div class="left">
+      <div class="row" style="margin-bottom:10px">
+        <div class="modeseg" id="modeSeg">
+          <button data-mode="loop" class="on">loop</button>
+          <button data-mode="song">song</button>
+        </div>
+      </div>
       <div class="transport">
         <button class="btn play" id="playBtn"></button>
         <label class="stat">tempo <input class="num" id="bpm" type="number" inputmode="numeric" min="40" max="300" /></label>
@@ -164,7 +166,6 @@
       <nav class="tabs" id="tabs"></nav>
       <section class="gridwrap"><div class="grid" id="grid"></div></section>
       <div class="row under">
-        <span class="stat hint">tap to place · tap again to erase · drag right to hold</span>
         <button class="btn sm" id="undoBtn">↶ undo</button>
         <button class="btn sm" id="clearBtn">clear</button>
       </div>
@@ -176,14 +177,10 @@
       <section class="chanControls" id="shapeRow"></section>
       <div id="envWrap" style="display:none">
         <div class="env" id="env"></div>
-        <p class="stat hint" id="envHint" style="margin:6px 0 0">how each note fades — left is the start of the note, drag to draw</p>
       </div>
-      <p class="stat hint" id="triNote" style="display:none;margin:4px 0 0">
-        the triangle always plays at one loudness — that's how the real console works
-      </p>
 
-      <h2>song</h2>
       <div id="orderSec" style="display:none">
+        <h2>song</h2>
         <div class="frames" id="frames"></div>
         <div class="grid4">
           <button class="btn" id="addPart">+ new</button>
@@ -191,9 +188,7 @@
           <button class="btn" id="copyPart">copy</button>
           <button class="btn" id="delPart">delete</button>
         </div>
-        <p class="stat hint" style="margin:6px 0 0">repeat plays the same part again · copy makes a version you can change</p>
       </div>
-      <p class="stat hint" id="songHint" style="margin:0">switch to <b>song</b> up top to chain parts into a longer piece</p>
 
       <h2>keep &amp; share</h2>
       <div class="grid2">
@@ -205,64 +200,59 @@
         <button class="btn" id="stemsBtn">stems</button>
         <button class="btn" id="codeBtn">code</button>
       </div>
-      <p class="stat hint" id="exportHint" style="margin:6px 0 0"></p>
       <input type="file" id="fileInput" accept=".json" style="display:none" />
     </div>
   </div>
 
   <div class="howto" id="howto" style="display:none">
     <h2>what is this</h2>
-    <p>a little music maker that sounds like an old nintendo. tap squares to place notes,
-       press play to hear them loop, and export your song when you like it.
-       everything happens in your browser, and your work is saved automatically on this device.</p>
+    <p>a music maker that sounds like an old nintendo. tap squares to place notes,
+       press play to hear them, and export the result. everything runs in your
+       browser and your work saves automatically on this device.</p>
 
     <h2>the four sounds</h2>
     <p><b style="color:#f83800">pulse 1</b> and <b style="color:#0078f8">pulse 2</b> —
-       the bright, beepy melody sounds. the <code>tone</code> switch makes them thinner and buzzier
-       or rounder and fuller.</p>
-    <p><b style="color:#00b800">triangle</b> — soft and deep. good for basslines.
-       it always plays at one loudness, just like on the real console.</p>
-    <p><b style="color:#bcbcbc">noise</b> — static, for drums. row 1 is short and crisp
-       (think hi-hats), higher numbers get deeper and boomier.</p>
+       bright melody sounds. <code>tone</code> makes them thinner or fuller.</p>
+    <p><b style="color:#00b800">triangle</b> — soft and deep, good for bass.
+       it has no volume control; the real console doesn't either.</p>
+    <p><b style="color:#bcbcbc">noise</b> — static, for drums. row 1 is short and
+       sharp; higher rows are deeper.</p>
 
     <h2>placing notes</h2>
-    <p>pick a sound, then tap squares. up and down is pitch, left to right is time.
-       tap a note again to erase it. <b>drag to the right to hold a note longer</b> —
-       long triangle notes make great basslines. each sound can only play one note
-       at a time — a real limit of the console.</p>
-    <p><code>octave − / +</code> shifts the grid higher or lower. notes you placed elsewhere
-       keep playing even when they scroll out of view. <code>undo</code> takes back your
-       last change, and placing a note plays it so you can hear what you're getting.</p>
+    <p>pick a sound, then tap a square. up and down is pitch, left to right is time.
+       tap a note to erase it. drag right to hold a note across steps.
+       each sound plays one note at a time.</p>
+    <p><code>octave − / +</code> moves the grid higher or lower. notes outside the
+       visible octave still play. <code>undo</code> takes back the last change.
+       <code>clear</code> erases the sound you're looking at.</p>
 
-    <h2>shaping the sound</h2>
-    <p>each sound has a <code>shape</code> — how a note fades after it starts.
-       <code>pluck</code> hits and dies away, <code>lead</code> holds strong,
-       <code>soft</code> swells in gently, <code>long</code> fades slowly.
-       tap <code>edit</code> to draw your own with your finger.</p>
+    <h2>shape</h2>
+    <p><code>shape</code> controls how each note fades. <code>pluck</code> fades fast,
+       <code>lead</code> holds, <code>soft</code> starts quiet, <code>long</code> fades
+       slowly. <code>edit</code> lets you draw your own.</p>
 
     <h2>building a song</h2>
-    <p>the <code>loop | song</code> switch at the top: <code>loop</code> plays just the part
-       you're editing, over and over — good for sketching. <code>song</code> plays all your
-       parts in a row.</p>
-    <p>in song view: <code>+ new</code> adds an empty part, <code>repeat</code> plays the same
-       part again (edit one, both change), <code>copy</code> makes a separate version you can
-       change, <code>delete</code> removes one. tap a part to edit it.</p>
+    <p><code>loop</code> plays the part you're editing, over and over.
+       <code>song</code> plays all your parts in order.</p>
+    <p>in song view: <code>+ new</code> adds an empty part. <code>repeat</code> plays
+       the same part again — editing one changes both. <code>copy</code> makes a
+       separate copy you can change. <code>delete</code> removes a part.
+       tap a part to edit it.</p>
 
     <h2>saving</h2>
-    <p>your song autosaves on this device. <code>save</code> downloads it as a small file you can
-       keep or share; <code>load</code> opens one again — including songs from the older
-       version of this app. nothing is stored online.</p>
+    <p>your song saves automatically on this device. <code>save</code> downloads it
+       as a file; <code>load</code> opens one. files from the older version of this
+       app still load.</p>
 
     <h2>exporting</h2>
-    <p><code>audio</code> downloads your music as a sound file (wav).
-       <code>stems</code> gives you a separate wav for each sound, zipped together,
-       so you can mix them in other apps.</p>
-    <p><code>code</code> is for programmers: it turns your song into a single file that plays
-       in a real nes game — the music data plus a small player. how to wire it up is explained
-       at the top of the file. if that means nothing to you, you can happily ignore this button.</p>
+    <p><code>audio</code> downloads your music as a wav file. <code>stems</code>
+       downloads one wav per sound, zipped.</p>
+    <p><code>code</code> downloads the song as 6502 assembly for use in an nes game.
+       instructions are at the top of the file. if that means nothing to you,
+       ignore this button.</p>
 
     <h2>not here yet</h2>
-    <p>no slides, vibrato, or echo effects, and no sampled drums — those are on the list.</p>
+    <p>no slides, vibrato, or drum samples yet.</p>
   </div>
 </div>
 

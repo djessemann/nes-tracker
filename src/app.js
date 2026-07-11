@@ -160,11 +160,11 @@ const els = {
   tracker: $("tracker"), howto: $("howto"),
   playBtn: $("playBtn"), bpm: $("bpm"), pos: $("pos"),
   tabs: $("tabs"), grid: $("grid"), undoBtn: $("undoBtn"), clearBtn: $("clearBtn"),
-  ctrls: $("ctrls"), shapeRow: $("shapeRow"), envWrap: $("envWrap"), env: $("env"), envHint: $("envHint"), triNote: $("triNote"),
-  orderSec: $("orderSec"), frames: $("frames"), songHint: $("songHint"),
+  ctrls: $("ctrls"), shapeRow: $("shapeRow"), envWrap: $("envWrap"), env: $("env"),
+  orderSec: $("orderSec"), frames: $("frames"),
   addPart: $("addPart"), repeatPart: $("repeatPart"), copyPart: $("copyPart"), delPart: $("delPart"),
   saveBtn: $("saveBtn"), loadBtn: $("loadBtn"), wavBtn: $("wavBtn"), stemsBtn: $("stemsBtn"), codeBtn: $("codeBtn"),
-  exportHint: $("exportHint"), fileInput: $("fileInput"),
+  fileInput: $("fileInput"),
   asmModal: $("asmModal"), asmText: $("asmText"), asmCopy: $("asmCopy"), asmDl: $("asmDl"), asmClose: $("asmClose"),
   confirmModal: $("confirmModal"), confirmMsg: $("confirmMsg"), confirmOk: $("confirmOk"), confirmCancel: $("confirmCancel"),
 };
@@ -411,7 +411,6 @@ function renderCtrls() {
   }
 
   els.shapeRow.innerHTML = "";
-  els.triNote.style.display = tab === "tri" ? "" : "none";
   if (tab !== "tri") {
     const names = Object.keys(shapesFor(tab));
     const s = seg(names, chan.shape, (name) => {
@@ -441,8 +440,6 @@ function renderEnv() {
     bar.style.background = v ? col : "#333";
     els.env.appendChild(bar);
   });
-  els.envHint.textContent = "how each note fades — left is the start of the note, drag to draw" +
-    (chan.shape === "custom" ? " (custom)" : "");
 }
 function envPaint(e) {
   const r = els.env.getBoundingClientRect();
@@ -465,7 +462,6 @@ els.env.onpointermove = (e) => { if (e.buttons) envPaint(e); };
 function renderFrames() {
   const showOrder = state.mode === "song" || state.doc.order.length > 1;
   els.orderSec.style.display = showOrder ? "" : "none";
-  els.songHint.style.display = showOrder ? "none" : "";
   if (!showOrder) return;
   const playSlot = state.playing && state.mode === "song" ? Math.floor(state.playStep / STEPS) : -1;
   els.frames.innerHTML = "";
@@ -610,9 +606,6 @@ function render() {
   renderGrid();
   renderCtrls();
   renderFrames();
-  els.exportHint.innerHTML =
-    `audio = wav of ${state.mode === "loop" ? "this part, twice through" : "the whole song"} · ` +
-    `stems = one wav per sound · code = for nes games`;
 }
 
 els.bpm.value = String(state.doc.bpm);
