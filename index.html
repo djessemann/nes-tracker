@@ -1,31 +1,295 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <meta name="theme-color" content="#000000" />
-    <title>nestracker — nes music maker</title>
-    <meta name="description" content="Make NES chiptune loops and songs in your browser — a touch-friendly step sequencer with real 2A03 synthesis and wav, stem, and 6502 export." />
-    <link rel="icon" type="image/png" sizes="32x32" href="favicon.png" />
-    <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png" />
-    <link rel="apple-touch-icon" href="apple-touch-icon.png" />
-    <link rel="manifest" href="manifest.json" />
-    <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="nestracker" />
-    <meta property="og:title" content="nestracker — nes music maker" />
-    <meta property="og:description" content="Make NES chiptune loops and songs in your browser." />
-    <meta property="og:url" content="https://djessemann.github.io/nes-tracker/" />
-    <meta property="og:image" content="https://djessemann.github.io/nes-tracker/og.png" />
-    <meta property="og:image:width" content="1200" />
-    <meta property="og:image:height" content="630" />
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="nestracker — nes music maker" />
-    <meta name="twitter:description" content="Make NES chiptune loops and songs in your browser." />
-    <meta name="twitter:image" content="https://djessemann.github.io/nes-tracker/og.png" />
-    <style>body { margin: 0; background: #000; }</style>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta name="theme-color" content="#000000" />
+<title>nestracker — nes music maker</title>
+<meta name="description" content="Make NES chiptune loops and songs in your browser — a touch-friendly step sequencer with real 2A03 synthesis and wav, stem, and 6502 export." />
+<link rel="icon" type="image/png" sizes="32x32" href="favicon.png" />
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png" />
+<link rel="apple-touch-icon" href="apple-touch-icon.png" />
+<link rel="manifest" href="manifest.json" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="nestracker" />
+<meta property="og:title" content="nestracker — nes music maker" />
+<meta property="og:description" content="Make NES chiptune loops and songs in your browser." />
+<meta property="og:url" content="https://djessemann.github.io/nes-tracker/" />
+<meta property="og:image" content="https://djessemann.github.io/nes-tracker/og.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="nestracker — nes music maker" />
+<meta name="twitter:description" content="Make NES chiptune loops and songs in your browser." />
+<meta name="twitter:image" content="https://djessemann.github.io/nes-tracker/og.png" />
+<style>
+  :root {
+    --bg: #000000; --ink: #ffffff; --line: #ffffff; --muted: #999999; --soft: #666666;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font: 14px/1.45 ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  }
+  .app { max-width: 640px; margin: 0 auto; padding: 0 12px 48px; }
+
+  header {
+    position: sticky; top: 0; z-index: 10; background: var(--bg);
+    display: flex; align-items: center; gap: 10px; padding: 14px 2px 12px;
+    border-bottom: 1px solid var(--line); margin-bottom: 14px;
+  }
+  header h1 { font-size: 16px; margin: 0; font-weight: 700; letter-spacing: .5px; }
+  .hdr-actions { margin-left: auto; display: flex; gap: 8px; }
+  .howto-link { color: var(--ink); background: var(--bg); font: inherit; font-size: 12px;
+                border: 1px solid var(--line); padding: 7px 11px; cursor: pointer; border-radius: 0; }
+
+  h2 { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted);
+       margin: 18px 0 8px; font-weight: 700; }
+
+  .btn, .num {
+    font: inherit; color: var(--ink); background: var(--bg);
+    border: 1px solid var(--line); border-radius: 0; padding: 9px 11px; cursor: pointer;
+  }
+  .btn:active { background: #222; }
+  .btn.on { background: var(--ink); color: #000; border-color: var(--ink); font-weight: 700; }
+  .btn:disabled { opacity: .4; cursor: default; }
+  .btn.sm { padding: 6px 10px; font-size: 12px; }
+  .btn:focus-visible, .howto-link:focus-visible { outline: 2px solid var(--ink); outline-offset: 1px; }
+  .num { width: 58px; text-align: center; padding: 8px 4px; cursor: text; }
+
+  .row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .grid2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .grid4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  .stat { color: var(--muted); font-size: 12px; display: inline-flex; align-items: center; gap: 6px; }
+  .hint { line-height: 1.5; display: inline; color: var(--muted); font-size: 12px; }
+  .hint b, .hint code { color: var(--ink); font: inherit; font-weight: 700; }
+
+  .modeseg { display: inline-flex; }
+  .modeseg button {
+    font: inherit; color: var(--ink); background: var(--bg); cursor: pointer;
+    border: 1px solid var(--line); border-radius: 0; font-size: 12px; padding: 7px 12px; letter-spacing: .5px;
+  }
+  .modeseg button + button { border-left-width: 0; }
+  .modeseg button.on { background: var(--ink); color: #000; font-weight: 700; }
+  .modeseg button:focus-visible { outline: 2px solid var(--ink); outline-offset: 1px; }
+
+  .transport { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+  .btn.play { width: 92px; display: inline-flex; align-items: center; justify-content: center; gap: 7px; }
+  .btn.play svg { width: 14px; height: 14px; display: block; }
+  .transport .pos { margin-left: auto; color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+
+  .tabs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 8px; }
+  .tabs .btn { padding: 9px 2px; font-size: 12px; }
+
+  .gridwrap { border: 1px solid var(--line); overflow-x: auto; }
+  .grid { display: flex; flex-direction: column; gap: 2px; padding: 4px; min-width: 430px; }
+  .gridrow { display: grid; grid-template-columns: 34px repeat(16, 1fr); gap: 2px; height: 26px; touch-action: none; }
+  .rowlabel { color: var(--soft); font-size: 10px; display: flex; align-items: center; padding-left: 2px;
+              user-select: none; -webkit-user-select: none;
+              position: sticky; left: 4px; background: var(--bg); z-index: 1; }
+  .cell { background: #0d0d0d; border: 1px solid #262626; pointer-events: none; }
+  .cell.beat { background: #1c1c1c; }
+  .cell.playing { border-color: var(--ink); }
+  .under { justify-content: flex-end; margin-top: 6px; }
+  .under .hint { margin-right: auto; }
+
+  .chanControls { display: flex; gap: 14px; align-items: center; flex-wrap: wrap;
+                  padding: 2px 0 8px; color: var(--muted); font-size: 12px; }
+  .ctrlGroup { display: flex; gap: 6px; align-items: center; }
+  .octval { min-width: 18px; text-align: center; color: var(--ink); }
+  .chanControls .modeseg button { padding: 6px 10px; }
+
+  .env { display: flex; align-items: flex-end; gap: 2px; height: 82px; border: 1px solid var(--line);
+         padding: 6px; touch-action: none; cursor: pointer; }
+  .env .bar { flex: 1; min-height: 3px; }
+
+  .frames { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; margin-bottom: 8px; }
+  .frame { flex: 0 0 auto; border: 1px solid var(--line); background: var(--bg);
+           padding: 5px 10px; cursor: pointer; text-align: center; }
+  .frame.on { box-shadow: 0 0 0 2px var(--ink); }
+  .frame b { display: block; font-size: 15px; }
+  .frame small { color: var(--muted); font-size: 10px; white-space: nowrap; }
+
+  .modal-overlay { position: fixed; inset: 0; z-index: 100; background: rgba(0,0,0,.72);
+    display: flex; align-items: center; justify-content: center; padding: 24px; }
+  .modal-overlay[hidden] { display: none; }
+  .modal { background: var(--bg); border: 1px solid var(--line); width: 100%; max-width: 360px; padding: 18px; }
+  .modal.wide { max-width: 560px; max-height: 80vh; display: flex; flex-direction: column; padding: 0; }
+  .modal-msg { margin: 0 0 16px; color: var(--ink); line-height: 1.5; }
+  .modal-actions { display: flex; justify-content: flex-end; gap: 10px; }
+  .modal-bar { display: flex; justify-content: space-between; align-items: center;
+               padding: 8px 10px; border-bottom: 1px solid var(--line); font-size: 12px; }
+  .asm { margin: 0; padding: 10px; overflow: auto; font-size: 11px; line-height: 1.5; color: var(--muted); }
+
+  .howto { max-width: 560px; padding-bottom: 24px; }
+  .howto p { margin: 0 0 10px; line-height: 1.55; color: var(--muted); font-size: 13px; }
+  .howto b { font-weight: 700; }
+  .howto code { background: #141414; border: 1px solid #2a2a2a; padding: 0 4px; color: var(--ink);
+                font: inherit; font-size: 12px; }
+
+  .layout, .left, .right { display: contents; }
+  @media (min-width: 1100px) {
+    .app { max-width: 1120px; }
+    .layout { display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 24px; align-items: start; }
+    .left { display: block; position: sticky; top: 64px; }
+    .right { display: block; }
+    .right > h2:first-child { margin-top: 0; }
+    .gridrow { height: 30px; }
+  }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <h1>nestracker</h1>
+    <div class="modeseg" id="modeSeg">
+      <button data-mode="loop" class="on">loop</button>
+      <button data-mode="song">song</button>
+    </div>
+    <div class="hdr-actions">
+      <button class="howto-link" id="newBtn">new</button>
+      <button class="howto-link" id="howtoBtn">how to</button>
+    </div>
+  </header>
+
+  <div class="layout" id="tracker">
+    <div class="left">
+      <div class="transport">
+        <button class="btn play" id="playBtn"></button>
+        <label class="stat">tempo <input class="num" id="bpm" type="number" inputmode="numeric" min="40" max="300" /></label>
+        <span class="pos" id="pos"></span>
+      </div>
+      <nav class="tabs" id="tabs"></nav>
+      <section class="gridwrap"><div class="grid" id="grid"></div></section>
+      <div class="row under">
+        <span class="stat hint">tap to place · tap again to erase · drag right to hold</span>
+        <button class="btn sm" id="undoBtn">↶ undo</button>
+        <button class="btn sm" id="clearBtn">clear</button>
+      </div>
+    </div>
+
+    <div class="right">
+      <h2>sound</h2>
+      <section class="chanControls" id="ctrls"></section>
+      <section class="chanControls" id="shapeRow"></section>
+      <div id="envWrap" style="display:none">
+        <div class="env" id="env"></div>
+        <p class="stat hint" id="envHint" style="margin:6px 0 0">how each note fades — left is the start of the note, drag to draw</p>
+      </div>
+      <p class="stat hint" id="triNote" style="display:none;margin:4px 0 0">
+        the triangle always plays at one loudness — that's how the real console works
+      </p>
+
+      <h2>song</h2>
+      <div id="orderSec" style="display:none">
+        <div class="frames" id="frames"></div>
+        <div class="grid4">
+          <button class="btn" id="addPart">+ new</button>
+          <button class="btn" id="repeatPart">repeat</button>
+          <button class="btn" id="copyPart">copy</button>
+          <button class="btn" id="delPart">delete</button>
+        </div>
+        <p class="stat hint" style="margin:6px 0 0">repeat plays the same part again · copy makes a version you can change</p>
+      </div>
+      <p class="stat hint" id="songHint" style="margin:0">switch to <b>song</b> up top to chain parts into a longer piece</p>
+
+      <h2>keep &amp; share</h2>
+      <div class="grid2">
+        <button class="btn" id="saveBtn">save</button>
+        <button class="btn" id="loadBtn">load</button>
+      </div>
+      <div class="grid3" style="margin-top:8px">
+        <button class="btn" id="wavBtn">audio</button>
+        <button class="btn" id="stemsBtn">stems</button>
+        <button class="btn" id="codeBtn">code</button>
+      </div>
+      <p class="stat hint" id="exportHint" style="margin:6px 0 0"></p>
+      <input type="file" id="fileInput" accept=".json" style="display:none" />
+    </div>
+  </div>
+
+  <div class="howto" id="howto" style="display:none">
+    <h2>what is this</h2>
+    <p>a little music maker that sounds like an old nintendo. tap squares to place notes,
+       press play to hear them loop, and export your song when you like it.
+       everything happens in your browser, and your work is saved automatically on this device.</p>
+
+    <h2>the four sounds</h2>
+    <p><b style="color:#f83800">pulse 1</b> and <b style="color:#0078f8">pulse 2</b> —
+       the bright, beepy melody sounds. the <code>tone</code> switch makes them thinner and buzzier
+       or rounder and fuller.</p>
+    <p><b style="color:#00b800">triangle</b> — soft and deep. good for basslines.
+       it always plays at one loudness, just like on the real console.</p>
+    <p><b style="color:#bcbcbc">noise</b> — static, for drums. row 1 is short and crisp
+       (think hi-hats), higher numbers get deeper and boomier.</p>
+
+    <h2>placing notes</h2>
+    <p>pick a sound, then tap squares. up and down is pitch, left to right is time.
+       tap a note again to erase it. <b>drag to the right to hold a note longer</b> —
+       long triangle notes make great basslines. each sound can only play one note
+       at a time — a real limit of the console.</p>
+    <p><code>octave − / +</code> shifts the grid higher or lower. notes you placed elsewhere
+       keep playing even when they scroll out of view. <code>undo</code> takes back your
+       last change, and placing a note plays it so you can hear what you're getting.</p>
+
+    <h2>shaping the sound</h2>
+    <p>each sound has a <code>shape</code> — how a note fades after it starts.
+       <code>pluck</code> hits and dies away, <code>lead</code> holds strong,
+       <code>soft</code> swells in gently, <code>long</code> fades slowly.
+       tap <code>edit</code> to draw your own with your finger.</p>
+
+    <h2>building a song</h2>
+    <p>the <code>loop | song</code> switch at the top: <code>loop</code> plays just the part
+       you're editing, over and over — good for sketching. <code>song</code> plays all your
+       parts in a row.</p>
+    <p>in song view: <code>+ new</code> adds an empty part, <code>repeat</code> plays the same
+       part again (edit one, both change), <code>copy</code> makes a separate version you can
+       change, <code>delete</code> removes one. tap a part to edit it.</p>
+
+    <h2>saving</h2>
+    <p>your song autosaves on this device. <code>save</code> downloads it as a small file you can
+       keep or share; <code>load</code> opens one again — including songs from the older
+       version of this app. nothing is stored online.</p>
+
+    <h2>exporting</h2>
+    <p><code>audio</code> downloads your music as a sound file (wav).
+       <code>stems</code> gives you a separate wav for each sound, zipped together,
+       so you can mix them in other apps.</p>
+    <p><code>code</code> is for programmers: it turns your song into a single file that plays
+       in a real nes game — the music data plus a small player. how to wire it up is explained
+       at the top of the file. if that means nothing to you, you can happily ignore this button.</p>
+
+    <h2>not here yet</h2>
+    <p>no slides, vibrato, or echo effects, and no sampled drums — those are on the list.</p>
+  </div>
+</div>
+
+<div class="modal-overlay" id="asmModal" hidden>
+  <div class="modal wide">
+    <div class="modal-bar">
+      <span>song.s</span>
+      <span class="row">
+        <button class="btn sm" id="asmCopy">copy</button>
+        <button class="btn sm" id="asmDl">download</button>
+        <button class="btn sm" id="asmClose">×</button>
+      </span>
+    </div>
+    <pre class="asm" id="asmText"></pre>
+  </div>
+</div>
+
+<div class="modal-overlay" id="confirmModal" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="confirmMsg">
+    <p class="modal-msg" id="confirmMsg"></p>
+    <div class="modal-actions">
+      <button class="btn" id="confirmCancel">cancel</button>
+      <button class="btn on" id="confirmOk">ok</button>
+    </div>
+  </div>
+</div>
+
+<script type="module" src="src/app.js"></script>
+</body>
 </html>

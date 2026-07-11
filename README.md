@@ -13,10 +13,11 @@ shares its design system: black, monospace, 1px white borders, no fuss.
 
 ## Run it
 
+No build step — the repo is the site, like nesprite. Serve the folder
+with any static server and open it:
+
 ```bash
-npm install
-npm run dev      # local dev server
-npm run build    # static build in dist/
+npm run dev      # python3 -m http.server 8080
 npm test         # engine + 6502 driver tests (driver test needs ca65)
 ```
 
@@ -46,12 +47,15 @@ browser and save/load as JSON files.
 
 ## Architecture
 
+Plain HTML + JavaScript modules, no framework, no build step:
+
+- `index.html` — markup + all CSS
+- `src/app.js` — the UI (imperative, nesprite-style)
 - `src/apu.js` — the sound core + song player (single source of truth;
   runs both in the AudioWorklet and for offline wav rendering)
-- `src/audio.js` — worklet bridge (loads apu.js source into the worklet)
+- `src/audio.js` — worklet bridge (fetches apu.js source into the worklet)
 - `src/export6502.js` — ca65 exporter (data + driver)
 - `src/files.js` — wav encoder, zip writer, downloads
-- `src/App.jsx` — the UI
 
 See `CLAUDE.md` for conventions before making changes.
 

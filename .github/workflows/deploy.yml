@@ -1,4 +1,4 @@
-name: deploy to github pages
+name: test and deploy
 on:
   push:
     branches: [main]
@@ -11,26 +11,27 @@ concurrency:
   group: pages
   cancel-in-progress: true
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: npm
-      - run: npm ci
       - run: npm test
-      - run: npm run build
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: dist
+  # There is no build step — the repo IS the site (like nesprite). This deploy
+  # job covers the "GitHub Actions" Pages source; if Pages is set to deploy
+  # from the branch instead, GitHub publishes the same files on its own.
   deploy:
-    needs: build
+    needs: test
     runs-on: ubuntu-latest
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
+      - uses: actions/checkout@v4
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
       - id: deployment
         uses: actions/deploy-pages@v4

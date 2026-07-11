@@ -34,14 +34,22 @@ Companion app to nesprite (https://djessemann.github.io/nesprite/).
   see audio.js) AND on the main thread for wav/stem export. It must stay
   dependency-free, no ESM imports, and keep its single one-line `export`
   statement at the bottom (audio.js strips it with a regex).
-- `src/audio.js` — builds the worklet from apu.js source + glue, exposes
+- NO BUILD STEP. The repo is the site (GitHub Pages serves the branch
+  directly, like nesprite). Never add a bundler, framework, or anything
+  that requires compiling before the browser can run it.
+- Never rebuild the grid dom during a pointer gesture — it destroys the
+  row element holding the pointer capture and kills the drag. Gesture
+  edits go through paintSpans(), full renders happen after.
+- `src/audio.js` — fetches apu.js source at runtime, strips the export
+  line, appends worklet glue, loads it as an AudioWorklet. Exposes
   initAudio()/post(). initAudio must be called from a user gesture.
 - `src/export6502.js` — emits song.s: header docs, constants, a ca65
   driver (music_init/music_play), envelope + step tables. Data comes from
   the same compileSong(). Keep the header comments accurate — they are
   the documentation for the format.
 - `src/files.js` — wav encoder, minimal zip (store method), download.
-- `src/App.jsx` — all UI. Document state shape:
+- `src/app.js` — all UI, imperative (state object + render functions,
+  no framework). index.html holds the markup and CSS. Document shape:
   { bpm, patterns[], order[], chans } where a pattern is
   { p1, p2, tri, noise }, each Array(16) of null | { n, len } (n = midi
   note or noise period index; len in steps). order[] holds pattern
@@ -58,8 +66,8 @@ Companion app to nesprite (https://djessemann.github.io/nesprite/).
   `npm test`: tests/engine.test.mjs checks the player and formats, and
   tests/driver.test.mjs assembles the 6502 export with ca65 and executes
   it on a mini interpreter, asserting APU register writes per frame.
-- bpm input: free-typing text state + clamped numeric state. Don't clamp
-  in onChange against the text or the field locks up (it happened once).
+- bpm input: free-typing field + clamped doc value. Don't write the
+  clamped value back into the field while typing or it locks up.
 - Controlled number inputs and iOS: keep inputMode="numeric".
 - Grid gestures use Pointer Events with setPointerCapture on the row;
   cells are pointer-events:none so the row does the math. touch-action:
@@ -77,4 +85,4 @@ Companion app to nesprite (https://djessemann.github.io/nesprite/).
 
 ## Commands
 
-- `npm run dev` / `npm run build` / `npm test`
+- `npm run dev` (static server) / `npm test`
