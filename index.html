@@ -55,6 +55,7 @@
   .btn:disabled { opacity: .4; cursor: default; }
   .btn.sm { padding: 6px 10px; font-size: 12px; }
   .btn:focus-visible, .howto-link:focus-visible { outline: 2px solid var(--ink); outline-offset: 1px; }
+  .num:focus { outline: 2px solid var(--ink); outline-offset: 1px; }
   .num { width: 58px; text-align: center; padding: 8px 4px; cursor: text; }
 
   .row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
@@ -244,9 +245,9 @@
        tap a part to edit it.</p>
 
     <h2>saving</h2>
-    <p>your song saves automatically on this device. <code>save</code> downloads it
-       as a file; <code>load</code> opens one. files from the older version of this
-       app still load.</p>
+    <p>your song saves automatically on this device. <code>save</code> asks for a
+       name and downloads the song as a file; <code>load</code> opens one. files
+       from the older version of this app still load.</p>
 
     <h2>exporting</h2>
     <p><code>audio</code> downloads your music as a wav file. <code>stems</code>
@@ -271,6 +272,18 @@
       </span>
     </div>
     <pre class="asm" id="asmText"></pre>
+  </div>
+</div>
+
+<div class="modal-overlay" id="saveModal" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="saveLabel">
+    <p class="modal-msg" id="saveLabel">name your song</p>
+    <input class="num" id="saveName" type="text" maxlength="40" placeholder="my song"
+           style="width:100%;text-align:left;margin-bottom:16px" />
+    <div class="modal-actions">
+      <button class="btn" id="saveCancel">cancel</button>
+      <button class="btn on" id="saveOk">save</button>
+    </div>
   </div>
 </div>
 

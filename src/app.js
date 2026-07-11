@@ -38,6 +38,7 @@ const emptyPattern = () => ({
   noise: Array(STEPS).fill(null),
 });
 const defaultDoc = () => ({
+  name: "",
   bpm: 150,
   patterns: [emptyPattern()],
   order: [0],
@@ -171,6 +172,7 @@ const els = {
   addPart: $("addPart"), repeatPart: $("repeatPart"), copyPart: $("copyPart"), delPart: $("delPart"),
   saveBtn: $("saveBtn"), loadBtn: $("loadBtn"), wavBtn: $("wavBtn"), stemsBtn: $("stemsBtn"), codeBtn: $("codeBtn"),
   fileInput: $("fileInput"),
+  saveModal: $("saveModal"), saveName: $("saveName"), saveOk: $("saveOk"), saveCancel: $("saveCancel"),
   asmModal: $("asmModal"), asmText: $("asmText"), asmCopy: $("asmCopy"), asmDl: $("asmDl"), asmClose: $("asmClose"),
   confirmModal: $("confirmModal"), confirmMsg: $("confirmMsg"), confirmOk: $("confirmOk"), confirmCancel: $("confirmCancel"),
 };
@@ -556,7 +558,7 @@ function runBusy(fn) {
 els.wavBtn.onclick = () =>
   runBusy(() => {
     const data = renderSong(state.doc, { mode: state.mode, loopPat: safePos(), loops: state.mode === "loop" ? 2 : 1 });
-    download(encodeWav(data), "nestracker-song.wav", "audio/wav");
+    download(encodeWav(data), fileBase() + ".wav", "audio/wav");
   });
 els.stemsBtn.onclick = () =>
   runBusy(() => {
@@ -565,11 +567,11 @@ els.stemsBtn.onclick = () =>
       const scope = state.mode === "song" ? state.doc.order : [state.doc.order[safePos()]];
       if (!scope.some((pi) => state.doc.patterns[pi][c.id].some((x) => x != null))) continue;
       const data = renderSong(state.doc, { mode: state.mode, loopPat: safePos(), loops: state.mode === "loop" ? 2 : 1, solo: c.id });
-      files.push({ name: `nestracker-${c.id}.wav`, data: encodeWav(data) });
+      files.push({ name: `${fileBase()}-${c.id}.wav`, data: encodeWav(data) });
     }
     if (!files.length) return;
     if (files.length === 1) download(files[0].data, files[0].name, "audio/wav");
-    else download(makeZip(files), "nestracker-stems.zip", "application/zip");
+    else download(makeZip(files), fileBase() + "-stems.zip", "application/zip");
   });
 els.codeBtn.onclick = () => {
   els.asmText.textContent = export6502(state.doc);
@@ -580,8 +582,26 @@ els.asmModal.onclick = (e) => { if (e.target === els.asmModal) els.asmModal.hidd
 els.asmCopy.onclick = () => navigator.clipboard?.writeText(els.asmText.textContent);
 els.asmDl.onclick = () => download(els.asmText.textContent, "song.s", "text/plain");
 
-els.saveBtn.onclick = () =>
-  download(JSON.stringify({ format: "nestracker-v2", ...state.doc, oct: state.oct }, null, 1), "nestracker-song.json", "application/json");
+const fileBase = () => {
+  const clean = (state.doc.name || "").trim().replace(/[\/\\:*?"<>|\x00-\x1f]/g, "").slice(0, 40);
+  return clean || "nestracker-song";
+};
+els.saveBtn.onclick = () => {
+  els.saveName.value = state.doc.name || "";
+  els.saveModal.hidden = false;
+  els.saveName.focus();
+  els.saveName.select();
+};
+const doSave = () => {
+  state.doc.name = els.saveName.value.trim();
+  els.saveModal.hidden = true;
+  scheduleSave();
+  download(JSON.stringify({ format: "nestracker-v2", ...state.doc, oct: state.oct }, null, 1), fileBase() + ".json", "application/json");
+};
+els.saveOk.onclick = doSave;
+els.saveCancel.onclick = () => { els.saveModal.hidden = true; };
+els.saveName.addEventListener("keydown", (e) => { if (e.key === "Enter") doSave(); });
+els.saveModal.onclick = (e) => { if (e.target === els.saveModal) els.saveModal.hidden = true; };
 els.loadBtn.onclick = () => els.fileInput.click();
 els.fileInput.onchange = (e) => {
   const f = e.target.files[0];
