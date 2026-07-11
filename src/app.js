@@ -182,9 +182,10 @@ const ICON_STOP = '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6
 
 // ---------- confirm modal ----------
 let confirmAction = null;
-function confirmBox(msg, onOk) {
+function confirmBox(msg, onOk, okLabel = "ok") {
   confirmAction = onOk;
   els.confirmMsg.textContent = msg;
+  els.confirmOk.textContent = okLabel;
   els.confirmCancel.style.display = onOk ? "" : "none";
   els.confirmModal.hidden = false;
 }
@@ -535,14 +536,14 @@ els.howtoBtn.onclick = () => {
   render();
 };
 els.newBtn.onclick = () =>
-  confirmBox("start a new song? the current one is erased (save it first if you want to keep it).", () => {
+  confirmBox("Start a new project? Anything not saved or exported will be lost.", () => {
     state.undo = [];
     state.doc = defaultDoc();
     state.pos = 0; state.mode = "loop"; state.playStep = -1;
     if (state.playing) { post({ cmd: "stop" }); state.playing = false; }
     els.bpm.value = "150";
     changed();
-  });
+  }, "new");
 
 // ---------- exports / save / load ----------
 function runBusy(fn) {
